@@ -7,7 +7,6 @@
     <meta name="description" content="A simple coverflow example using Three.js and GSAP." />
     <meta name="keywords" content="Three.js, GSAP, coverflow, 3D, JavaScript" />
     <link rel="stylesheet" href="style.css" />
-    <!-- Load Libraries -->
     <script type="importmap">
       {
         "imports": {
@@ -16,16 +15,44 @@
         }
       }
     </script>
-    <!-- Also load GSAP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script type="module" src="main.js"></script>
-    <!-- Adjust CSS -->
-    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div id="container"></div>
+
+    <!-- Coverflow navigation slider -->
     <div id="rangeSliderContainer">
       <input type="range" id="rangeSlider" min="0" max="1" step="0.01" />
+    </div>
+
+    <!-- Media player -->
+    <div id="player">
+      <button id="play-pause-btn" disabled>▶</button>
+      <div id="player-center">
+        <div id="player-title"></div>
+        <div id="player-progress">
+          <span id="time-current">0:00</span>
+          <input type="range" id="progress-bar" min="0" max="100" step="0.1" value="0" disabled />
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+      <audio id="audio-el"></audio>
+    </div>
+
+    <!-- Flip card overlay -->
+    <div id="flip-overlay">
+      <div id="flip-scene">
+        <div id="flip-card-inner">
+          <div id="flip-front">
+            <img id="flip-cover-img" src="" alt="" />
+          </div>
+          <div id="flip-back">
+            <button id="flip-close">×</button>
+            <div id="flip-text-content"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>

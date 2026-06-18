@@ -1,48 +1,35 @@
-html {
-  height: 100%;
-}
+html { height: 100%; }
 
 body {
   background: black;
   overflow: hidden;
   margin: 0;
+  padding: 0;
   font-family: sans-serif;
   color: white;
   height: 100%;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-#rangeSlider {
-  width: 80%;
-}
+canvas { background: #000; }
 
+/* ── Coverflow navigation slider ── */
 #rangeSliderContainer {
   position: absolute;
   z-index: 2;
-  bottom: 48px;
+  bottom: 76px;
   width: 100%;
   text-align: center;
 }
-@media (max-width: 768px) {
-  #rangeSliderContainer {
-    bottom: 24px;
-  }
-}
 
-input[type="range"] {
+#rangeSlider {
+  width: 80%;
   -webkit-appearance: none;
   border-radius: 10px;
 }
 
-input[type="range"]::-webkit-slider-container {
-  background: #000;
-}
+#rangeSlider::-webkit-slider-container { background: #000; }
 
-input[type="range"]::-webkit-slider-runnable-track {
+#rangeSlider::-webkit-slider-runnable-track {
   width: 30%;
   height: 12px;
   background: #000;
@@ -50,13 +37,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   border: 1px #777 solid;
 }
 
-/* タッチの場合は2倍 */
-.touch input[type="range"]::-webkit-slider-runnable-track {
-  height: 32px;
-  border-radius: 32px;
-}
-
-input[type="range"]::-webkit-slider-thumb {
+#rangeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 10px;
   width: 30%;
@@ -65,19 +46,177 @@ input[type="range"]::-webkit-slider-thumb {
   background: #777;
 }
 
-.touch input[type="range"]::-webkit-slider-thumb {
+#rangeSlider:focus { outline: rgba(255,255,255,0.2) solid 2px; }
+#rangeSlider:focus::-webkit-slider-runnable-track { background: #222; }
+
+@media (max-width: 768px) {
+  #rangeSliderContainer { bottom: 84px; }
+
+  .touch #rangeSlider::-webkit-slider-runnable-track { height: 32px; border-radius: 32px; }
+  .touch #rangeSlider::-webkit-slider-thumb { height: 30px; border-radius: 30px; }
+}
+
+/* ── Media player ── */
+#player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  background: rgba(8, 8, 18, 0.88);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  box-sizing: border-box;
+}
+
+#play-pause-btn {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+#play-pause-btn:hover:not(:disabled) { background: rgba(255,255,255,0.28); }
+#play-pause-btn:disabled { opacity: 0.35; cursor: default; }
+
+#player-center {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#player-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255,255,255,0.85);
+}
+
+#player-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+}
+
+#progress-bar {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.18);
+  outline: none;
+  cursor: pointer;
+}
+#progress-bar:disabled { cursor: default; opacity: 0.35; }
+
+#progress-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+}
+#progress-bar::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 3px;
+}
+
+/* ── Flip card overlay ── */
+#flip-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.1);
+}
+#flip-overlay.visible { display: flex; }
+
+#flip-scene {
+  /* size matched to Three.js card at runtime */
+  perspective: 1200px;
+  flex-shrink: 0;
+}
+
+#flip-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#flip-card-inner.flipped { transform: rotateY(180deg); }
+
+#flip-front,
+#flip-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+#flip-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#flip-back {
+  transform: rotateY(180deg);
+  background: #111827;
+  padding: 40px 32px 32px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+#flip-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
   height: 30px;
-  border-radius: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
 }
+#flip-close:hover { background: rgba(255,255,255,0.25); }
 
-input[type="range"]:focus {
-  outline: rgba(255, 255, 255, 0.2) solid 2px;
-}
-
-input[type="range"]:focus::-webkit-slider-runnable-track {
-  background: #222;
-}
-
-canvas {
-  background: #000000;
+#flip-text-content {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.8);
+  white-space: pre-wrap;
+  word-break: break-word;
 }

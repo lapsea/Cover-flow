@@ -1,131 +1,216 @@
 import * as THREE from "three";
 
-/** Background image URL */
 const BACKGROUND_IMAGE_URL = "background.png";
-
-/** Plane width */
 const PLANE_WIDTH = 256;
-/** Number of slides (will be updated based on data) */
-let numSlides = 0;
-/** Plane height */
 const PLANE_HEIGHT = 256;
-/** Current slide index */
-let currentSlideIndex = 0;
-/** Spacing between planes on the X-axis */
 const SLIDE_SPACING_X = 80;
 
-/**
- * Array to hold the slide objects
- * @type {SlideCard[]}
- */
+let numSlides = 0;
+let currentSlideIndex = 0;
+
+/** @type {SlideCard[]} */
 const slides = [];
-/**
- * Array to hold album data
- * @type {object[]}
- */
+/** @type {object[]} */
 let albumData = [];
 
-// Create 3D scene
-const scene = new THREE.Scene();
+// ── Three.js setup ──────────────────────────────────────────────────────────
 
-// Create Camera
+const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(30);
 scene.add(camera);
 
-// Create Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(devicePixelRatio);
-
-// Add Renderer element to the DOM
 document.body.appendChild(renderer.domElement);
 
-// Input element control (Slider)
+// ── Coverflow navigation slider ─────────────────────────────────────────────
+
 const elementInput = document.querySelector("input#rangeSlider");
-elementInput.addEventListener("input", onSliderChange); // Use the renamed function
-// elementInput.focus(); // Focusing is fine, but commented out as it wasn't suitable for ICS MEDIA iframe embedding
+elementInput.addEventListener("input", () => { if (!isFlipOpen()) onSliderChange(); });
 
-// Mouse wheel support
-window.addEventListener(
-  "wheel",
-  (event) => {
-    // Adjust slider value based on wheel delta
-    // The multiplier (0.0005) controls sensitivity, adjust as needed
-    elementInput.valueAsNumber += event.deltaY * 0.0005;
-    onSliderChange(); // Trigger slide movement
-    event.preventDefault(); // Prevent default page scroll
-  },
-  { passive: false }
-);
+window.addEventListener("wheel", (event) => {
+  if (isFlipOpen()) return;
+  elementInput.valueAsNumber += event.deltaY * 0.0005;
+  onSliderChange();
+  event.preventDefault();
+}, { passive: false });
 
-// --- Drag/Swipe Functionality ---
+// ── Drag / swipe ────────────────────────────────────────────────────────────
+
 let isDragging = false;
+let hasMoved = false;
 let startX = 0;
-let currentScrollLeft = 0; // Using this to simulate scroll position based on drag
+let currentScrollLeft = 0;
 
-// Add event listeners for mouse dragging
 renderer.domElement.addEventListener('mousedown', onPointerDown);
 renderer.domElement.addEventListener('mousemove', onPointerMove);
-window.addEventListener('mouseup', onPointerUp); // Listen on window to catch mouseup outside the canvas
+window.addEventListener('mouseup', onPointerUp);
 
-// Add event listeners for touch dragging
-renderer.domElement.addEventListener('touchstart', onPointerDown, { passive: true }); // Use passive: true where possible
-renderer.domElement.addEventListener('touchmove', onPointerMove, { passive: false }); // Need passive: false to preventDefault scroll
+renderer.domElement.addEventListener('touchstart', onPointerDown, { passive: true });
+renderer.domElement.addEventListener('touchmove', onPointerMove, { passive: false });
 renderer.domElement.addEventListener('touchend', onPointerUp);
-renderer.domElement.addEventListener('touchcancel', onPointerUp); // Handle cancellations
+renderer.domElement.addEventListener('touchcancel', onPointerUp);
+
+function isFlipOpen() {
+  return flipOverlay.classList.contains('visible');
+}
 
 function onPointerDown(event) {
+  if (isFlipOpen()) return;
   isDragging = true;
-  // Use clientX for mouse, touches[0].clientX for touch
+  hasMoved = false;
   startX = event.clientX ?? event.touches[0].clientX;
-  // Store the slider's current value at the start of the drag
   currentScrollLeft = elementInput.valueAsNumber;
-  renderer.domElement.style.cursor = 'grabbing'; // Change cursor
-  // Prevent text selection during drag
-  event.preventDefault();
+  renderer.domElement.style.cursor = 'grabbing';
+  event.preventDefault?.();
 }
 
 function onPointerMove(event) {
-  if (!isDragging) return;
-
-  // Prevent default scrolling behavior during horizontal drag
+  if (!isDragging || isFlipOpen()) return;
   event.preventDefault();
-
   const currentX = event.clientX ?? event.touches[0].clientX;
   const deltaX = currentX - startX;
-
-  // Adjust sensitivity: How much drag affects the slider value.
-  // Smaller number = more sensitive drag.
-  const sensitivity = window.innerWidth * 2; // Adjust this factor as needed
-  const scrollAmount = deltaX / sensitivity;
-
-  // Update slider value based on drag, clamping between 0 and 1
-  elementInput.valueAsNumber = Math.max(0, Math.min(1, currentScrollLeft - scrollAmount));
-
-  // Trigger the slider change handler to update the cover flow
+  if (Math.abs(deltaX) > 5) hasMoved = true;
+  const sensitivity = window.innerWidth * 2;
+  elementInput.valueAsNumber = Math.max(0, Math.min(1, currentScrollLeft - deltaX / sensitivity));
   onSliderChange();
 }
 
 function onPointerUp() {
   if (!isDragging) return;
   isDragging = false;
-  renderer.domElement.style.cursor = 'grab'; // Restore cursor
+  if (isFlipOpen()) return;
+  renderer.domElement.style.cursor = 'grab';
+  if (!hasMoved) showFlipCard();
 }
 
-// Initial cursor style
 renderer.domElement.style.cursor = 'grab';
 
+// ── Media player ─────────────────────────────────────────────────────────────
 
-/**
- * Cover Flow Example (Three.js version)
- * @author IKEDA Yasunobu (Updated by Cline & Addy Osmani)
- */
+const audioEl       = document.getElementById('audio-el');
+const playPauseBtn  = document.getElementById('play-pause-btn');
+const progressBar   = document.getElementById('progress-bar');
+const timeCurrent   = document.getElementById('time-current');
+const timeTotal     = document.getElementById('time-total');
+const playerTitle   = document.getElementById('player-title');
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+}
+
+playPauseBtn.addEventListener('click', () => {
+  audioEl.paused ? audioEl.play() : audioEl.pause();
+});
+
+audioEl.addEventListener('play',  () => { playPauseBtn.textContent = '⏸'; });
+audioEl.addEventListener('pause', () => { playPauseBtn.textContent = '▶'; });
+audioEl.addEventListener('ended', () => { playPauseBtn.textContent = '▶'; });
+
+audioEl.addEventListener('timeupdate', () => {
+  if (!audioEl.duration) return;
+  progressBar.value = (audioEl.currentTime / audioEl.duration) * 100;
+  timeCurrent.textContent = formatTime(audioEl.currentTime);
+});
+
+audioEl.addEventListener('loadedmetadata', () => {
+  timeTotal.textContent = formatTime(audioEl.duration);
+});
+
+progressBar.addEventListener('input', () => {
+  if (audioEl.duration) audioEl.currentTime = (progressBar.value / 100) * audioEl.duration;
+});
+
+function updatePlayer(album) {
+  playerTitle.textContent = album.artists
+    ? `${album.artists} — ${album.title}`
+    : album.title;
+
+  const hasAudio = !!album.audio_url;
+  playPauseBtn.disabled = !hasAudio;
+  progressBar.disabled  = !hasAudio;
+
+  if (hasAudio) {
+    const wasPlaying = !audioEl.paused;
+    audioEl.src = album.audio_url;
+    if (wasPlaying) audioEl.play();
+  } else {
+    audioEl.src = '';
+    timeCurrent.textContent = '0:00';
+    timeTotal.textContent   = '0:00';
+    progressBar.value = 0;
+  }
+}
+
+// ── Flip card ────────────────────────────────────────────────────────────────
+
+const flipOverlay     = document.getElementById('flip-overlay');
+const flipScene       = document.getElementById('flip-scene');
+const flipCardInner   = document.getElementById('flip-card-inner');
+const flipCoverImg    = document.getElementById('flip-cover-img');
+const flipTextContent = document.getElementById('flip-text-content');
+const flipClose       = document.getElementById('flip-close');
+
+flipClose.addEventListener('click', closeFlipCard);
+
+/** Match the flip card size to the visual size of the center Three.js card. */
+function syncFlipCardSize() {
+  // Vertical FOV is 30°; camera is at z=900; card is PLANE_HEIGHT units tall
+  const halfFovRad = (30 / 2) * (Math.PI / 180);
+  const worldHeight = 2 * camera.position.z * Math.tan(halfFovRad);
+  const px = Math.round(PLANE_HEIGHT / worldHeight * window.innerHeight);
+  flipScene.style.width  = px + 'px';
+  flipScene.style.height = px + 'px';
+}
+
+async function showFlipCard() {
+  const album = albumData[currentSlideIndex];
+
+  syncFlipCardSize();
+
+  // Hide the center Three.js card so it doesn't show through the semi-transparent overlay
+  slides[currentSlideIndex].visible = false;
+
+  // Show overlay with cover on front
+  flipCoverImg.src = album.image_url;
+  flipCoverImg.alt = album.title;
+  flipTextContent.textContent = '加载中…';
+  flipCardInner.classList.remove('flipped');
+  flipOverlay.classList.add('visible');
+
+  // Small delay so the browser renders the initial state before flipping
+  await new Promise(r => setTimeout(r, 40));
+  flipCardInner.classList.add('flipped');
+
+  // Load text content
+  if (album.text_url) {
+    try {
+      const res = await fetch(album.text_url);
+      flipTextContent.textContent = res.ok ? await res.text() : '（文件读取失败）';
+    } catch {
+      flipTextContent.textContent = '（文件读取失败）';
+    }
+  } else {
+    flipTextContent.textContent = '（暂无文本内容）';
+  }
+}
+
+function closeFlipCard() {
+  flipCardInner.classList.remove('flipped');
+  setTimeout(() => {
+    flipOverlay.classList.remove('visible');
+    slides[currentSlideIndex].visible = true;
+  }, 650);
+}
+
+// ── Scene initialization ─────────────────────────────────────────────────────
+
 async function init() {
-  // Light
   const pointLight = new THREE.PointLight(0xffffff, 4, 1000);
   pointLight.position.set(0, 0, 500);
   scene.add(pointLight);
 
-  // Load album data from local covers/ folder via server API
   try {
     const res = await fetch('/api/covers');
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -136,23 +221,15 @@ async function init() {
     return;
   }
 
-  // Create Slides
   for (let i = 0; i < numSlides; i++) {
-    // Create a slide card using album data
     const slide = new SlideCard(albumData[i]);
-
-    // Add to the 3D scene
     scene.add(slide);
-
-    // Store reference in the array
     slides[i] = slide;
   }
 
-  // Camera position
   camera.position.z = 900;
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-  // Create Background
   const backgroundTexture = new THREE.TextureLoader().load(BACKGROUND_IMAGE_URL);
   const backgroundMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(3000, 1000),
@@ -161,161 +238,89 @@ async function init() {
   backgroundMesh.position.z = -500;
   scene.add(backgroundMesh);
 
-  // Initial slide display (center)
-  moveSlide(Math.floor(numSlides / 2)); // Use Math.floor for potentially odd numbers
+  const centerIndex = Math.floor(numSlides / 2);
+  moveSlide(centerIndex);
+  updatePlayer(albumData[centerIndex]);
 
-  // Resize handling
   window.addEventListener("resize", onResize);
-  onResize(); // Fit to window size initially
-
-  // Start rendering loop
+  onResize();
   tick();
 }
 
-/**
- * Event handler for slider input change.
- */
+// ── Slide movement ───────────────────────────────────────────────────────────
+
 function onSliderChange() {
-  const sliderValue = elementInput.valueAsNumber;
-  // Calculate the target slide index from the slider value
-  const nextIndex = Math.round(sliderValue * (numSlides - 1));
-  // Move to the calculated slide
+  const nextIndex = Math.round(elementInput.valueAsNumber * (numSlides - 1));
   moveSlide(nextIndex);
 }
 
-/**
- * Moves the slides to the target index.
- * @param {number} targetIndex - The index of the slide to center.
- */
 function moveSlide(targetIndex) {
-  // If the target index is the same as the current one, do nothing.
-  if (currentSlideIndex === targetIndex) {
-    return;
-  }
+  if (currentSlideIndex === targetIndex) return;
 
   for (let i = 0; i < numSlides; i++) {
-    // Initialize target position and rotation values
-    let targetX = SLIDE_SPACING_X * (i - targetIndex); // Calculate base X position
+    let targetX = SLIDE_SPACING_X * (i - targetIndex);
     let targetZ = 0;
     let targetRotationY = 0;
 
-    // Slides to the left of the target slide
     if (i < targetIndex) {
-      targetX -= PLANE_WIDTH * 0.6; // Adjust X for spacing
-      targetZ = PLANE_WIDTH; // Move back in Z
-      targetRotationY = +45 * (Math.PI / 180); // Rotate
-    }
-    // Slides to the right of the target slide
-    else if (i > targetIndex) {
-      targetX += PLANE_WIDTH * 0.6; // Adjust X for spacing
-      targetZ = PLANE_WIDTH; // Move back in Z
-      targetRotationY = -45 * (Math.PI / 180); // Rotate
-    }
-    // The target slide itself
-    else {
-      targetX = 0; // Center X
-      targetZ = 0; // Center Z
-      targetRotationY = 0; // No rotation
+      targetX -= PLANE_WIDTH * 0.6;
+      targetZ = PLANE_WIDTH;
+      targetRotationY = +45 * (Math.PI / 180);
+    } else if (i > targetIndex) {
+      targetX += PLANE_WIDTH * 0.6;
+      targetZ = PLANE_WIDTH;
+      targetRotationY = -45 * (Math.PI / 180);
     }
 
-    // Get the reference to the current slide card
     const slide = slides[i];
-
-    // Animate position using GSAP
-    gsap.to(slide.position, {
-      x: targetX,
-      z: -1 * targetZ, // Invert Z for Three.js coordinate system
-      duration: 1.8, // Animation duration in seconds
-      ease: "expo.out", // Easing function
-      overwrite: true, // Allow overwriting previous animations
-    });
-
-    // Animate rotation using GSAP
-    gsap.to(slide.rotation, {
-      y: targetRotationY,
-      duration: 0.9, // Animation duration in seconds
-      ease: "expo.out", // Easing function
-      overwrite: true, // Allow overwriting previous animations
-    });
+    gsap.to(slide.position, { x: targetX, z: -targetZ, duration: 1.8, ease: "expo.out", overwrite: true });
+    gsap.to(slide.rotation, { y: targetRotationY, duration: 0.9, ease: "expo.out", overwrite: true });
   }
 
-  currentSlideIndex = targetIndex; // Update the current index
+  currentSlideIndex = targetIndex;
+  updatePlayer(albumData[targetIndex]);
 }
 
-/** Layout handling (also handles resize) */
+// ── Resize & render loop ──────────────────────────────────────────────────────
+
 function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 }
 
-/** Frame update loop (Enter frame event) */
 function tick() {
-  // Render the scene
   renderer.render(scene, camera);
-  // Request the next frame
   requestAnimationFrame(tick);
 }
 
-/**
- * Represents a single card/slide in the cover flow.
- */
+// ── SlideCard ─────────────────────────────────────────────────────────────────
+
 class SlideCard extends THREE.Object3D {
-  /**
-   * @param {object} album - The album data object from albums.json.
-   */
   constructor(album) {
     super();
-
-    // Use CORS proxy if images are on different domains and cause issues
-    // Example: const imageUrl = `https://cors-anywhere.herokuapp.com/${album.image_url}`;
-    const imageUrl = album.image_url; // Assuming direct loading works
-
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load(
-        imageUrl,
-        undefined, // onLoad callback (optional)
-        undefined, // onProgress callback (optional)
-        (error) => { // onError callback
-            console.error(`Failed to load texture for ${album.title}:`, error);
-            // Optionally load a placeholder texture
-            // const placeholderTexture = textureLoader.load('./imgs/placeholder.jpg');
-            // topMaterial.map = placeholderTexture;
-            // reflectionMaterial.map = placeholderTexture;
-            // topMaterial.needsUpdate = true;
-            // reflectionMaterial.needsUpdate = true;
-        }
+      album.image_url,
+      undefined,
+      undefined,
+      (err) => console.error(`Failed to load texture for ${album.title}:`, err)
     );
-
-    // Top plane (main image)
-    const topMaterial = new THREE.MeshLambertMaterial({
-      map: texture,
-    });
 
     const topPlane = new THREE.Mesh(
       new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT),
-      topMaterial
+      new THREE.MeshLambertMaterial({ map: texture })
     );
     this.add(topPlane);
 
-    // Reflection plane
-    const reflectionMaterial = new THREE.MeshLambertMaterial({
-      map: texture,
-      transparent: true,
-      side: THREE.BackSide, // Render the back side for reflection
-      opacity: 0.2,
-    });
-
     const reflectionPlane = new THREE.Mesh(
       new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT),
-      reflectionMaterial
+      new THREE.MeshLambertMaterial({ map: texture, transparent: true, side: THREE.BackSide, opacity: 0.2 })
     );
-    // Flip the reflection vertically and position it below the main plane
-    reflectionPlane.rotation.x = Math.PI; // Rotate 180 degrees around X-axis
-    reflectionPlane.position.y = -PLANE_HEIGHT - 1; // Position below with a small gap
+    reflectionPlane.rotation.x = Math.PI;
+    reflectionPlane.position.y = -PLANE_HEIGHT - 1;
     this.add(reflectionPlane);
   }
 }
 
-// Execute the initialization code
 init();

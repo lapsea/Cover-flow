@@ -3,8 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const COVERS_DIR = path.join(__dirname, 'covers');
 const ROOT_DIR = __dirname;
+const COVERS_DIR = path.join(__dirname, 'covers');
+const AUDIO_DIR  = path.join(__dirname, 'audio');
+const TEXTS_DIR  = path.join(__dirname, 'texts');
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -17,9 +19,21 @@ const MIME_TYPES = {
   '.gif': 'image/gif',
   '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
+  '.mp3': 'audio/mpeg',
+  '.m4a': 'audio/mp4',
+  '.ogg': 'audio/ogg',
+  '.wav': 'audio/wav',
+  '.aac': 'audio/aac',
+  '.txt': 'text/plain; charset=utf-8',
 };
 
 const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp']);
+const AUDIO_EXTS = ['.mp3', '.m4a', '.ogg', '.wav', '.aac'];
+
+function ensureDirs() {
+  for (const d of [COVERS_DIR, AUDIO_DIR, TEXTS_DIR])
+    if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+}
 
 function parseFilename(filename) {
   const name = path.basename(filename, path.extname(filename));
@@ -32,28 +46,37 @@ function parseFilename(filename) {
   return { artists: '', title: name, album: name };
 }
 
-function listCovers() {
-  if (!fs.existsSync(COVERS_DIR)) {
-    fs.mkdirSync(COVERS_DIR, { recursive: true });
+function findSidecar(dir, name, exts) {
+  for (const ext of exts) {
+    if (fs.existsSync(path.join(dir, name + ext)))
+      return '/' + path.basename(dir) + '/' + encodeURIComponent(name + ext);
   }
+  return null;
+}
+
+function listCovers() {
+  ensureDirs();
   return fs.readdirSync(COVERS_DIR)
     .filter(f => IMAGE_EXTS.has(path.extname(f).toLowerCase()))
     .sort()
-    .map((f, i) => ({
-      position: i + 1,
-      ...parseFilename(f),
-      image_url: `/covers/${encodeURIComponent(f)}`,
-    }));
+    .map((f, i) => {
+      const name = path.basename(f, path.extname(f));
+      return {
+        position: i + 1,
+        ...parseFilename(f),
+        image_url: `/covers/${encodeURIComponent(f)}`,
+        audio_url: findSidecar(AUDIO_DIR, name, AUDIO_EXTS),
+        text_url:  findSidecar(TEXTS_DIR, name, ['.txt']),
+      };
+    });
 }
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const pathname = url.pathname;
 
-  // CORS for local dev
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // API: list local covers
   if (pathname === '/api/covers') {
     const covers = listCovers();
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -61,8 +84,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Resolve file path, prevent directory traversal
-  const filePath = path.normalize(path.join(ROOT_DIR, pathname === '/' ? 'index.html' : pathname));
+  const filePath = path.normalize(path.join(ROOT_DIR, decodeURIComponent(pathname === '/' ? 'index.html' : pathname)));
   if (!filePath.startsWith(ROOT_DIR)) {
     res.writeHead(403);
     res.end('Forbidden');
@@ -83,6 +105,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\nCoverflow running at http://localhost:${PORT}\n`);
-  console.log(`Put cover images in the 'covers/' folder to display them.`);
-  console.log(`Filename format: "Artist - Album Title.jpg"\n`);
+  console.log(`covers/  — cover images  (Artist - Album.jpg)`);
+  console.log(`audio/   — audio files   (Artist - Album.mp3)`);
+  console.log(`texts/   — text files    (Artist - Album.txt)\n`);
 });
