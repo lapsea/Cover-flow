@@ -211,8 +211,11 @@ async function init() {
   pointLight.position.set(0, 0, 500);
   scene.add(pointLight);
 
+  // Prefer pre-built covers.json (Cloudflare Pages / after npm start).
+  // Fall back to live /api/covers (local server without a prior build).
   try {
-    const res = await fetch('/api/covers');
+    let res = await fetch('./covers.json');
+    if (!res.ok) res = await fetch('/api/covers');
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     albumData = await res.json();
     numSlides = albumData.length;
