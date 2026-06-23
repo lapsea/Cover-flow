@@ -202,6 +202,7 @@ canvas { background: #000; }
   position: absolute;
   top: 12px;
   right: 12px;
+  z-index: 1;
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -215,6 +216,11 @@ canvas { background: #000; }
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  /* Sits directly on flip-card-inner (not inside the scrollable flip-back),
+     so it must mirror the back face's orientation/visibility itself. */
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 #flip-close:hover { background: rgba(255,255,255,0.25); }
 
