@@ -150,6 +150,8 @@ canvas { background: #000; }
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.1);
+  /* Don't block clicks on the player/UI underneath; only the card itself is interactive. */
+  pointer-events: none;
 }
 #flip-overlay.visible { display: flex; }
 
@@ -157,6 +159,7 @@ canvas { background: #000; }
   /* size matched to Three.js card at runtime */
   perspective: 1200px;
   flex-shrink: 0;
+  pointer-events: auto;
 }
 
 #flip-card-inner {
