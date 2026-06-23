@@ -221,3 +221,14 @@ canvas { background: #000; }
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+#flip-text-content p.cue {
+  margin: 0 0 12px;
+  opacity: 0.4;
+  transition: opacity 0.25s, color 0.25s;
+}
+#flip-text-content p.cue.active {
+  opacity: 1;
+  color: #fff;
+  font-weight: 600;
+}

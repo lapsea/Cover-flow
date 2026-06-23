@@ -164,10 +164,45 @@ function syncFlipCardSize() {
   flipScene.style.height = px + 'px';
 }
 
+/** Currently-active timeupdate listener driving cue highlighting, if any. */
+let cueHighlightHandler = null;
+
+function clearCueHighlight() {
+  if (cueHighlightHandler) {
+    audioEl.removeEventListener('timeupdate', cueHighlightHandler);
+    cueHighlightHandler = null;
+  }
+}
+
+/** Render timed cues as paragraphs and highlight the one matching audio playback time. */
+function renderCues(cues) {
+  flipTextContent.innerHTML = '';
+  const paragraphs = cues.map(cue => {
+    const p = document.createElement('p');
+    p.className = 'cue';
+    p.textContent = cue.text;
+    flipTextContent.appendChild(p);
+    return p;
+  });
+
+  cueHighlightHandler = () => {
+    const t = audioEl.currentTime;
+    let active = null;
+    for (let i = 0; i < cues.length; i++) {
+      const isActive = t >= cues[i].start && t < cues[i].end;
+      paragraphs[i].classList.toggle('active', isActive);
+      if (isActive) active = paragraphs[i];
+    }
+    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  };
+  audioEl.addEventListener('timeupdate', cueHighlightHandler);
+}
+
 async function showFlipCard() {
   const album = albumData[currentSlideIndex];
 
   syncFlipCardSize();
+  clearCueHighlight();
 
   // Hide the center Three.js card so it doesn't show through the semi-transparent overlay
   slides[currentSlideIndex].visible = false;
@@ -183,8 +218,16 @@ async function showFlipCard() {
   await new Promise(r => setTimeout(r, 40));
   flipCardInner.classList.add('flipped');
 
-  // Load text content
-  if (album.text_url) {
+  // Prefer timed cues (synced highlighting); fall back to plain text, then a placeholder.
+  if (album.cues_url) {
+    try {
+      const res = await fetch(album.cues_url);
+      if (res.ok) renderCues(await res.json());
+      else flipTextContent.textContent = '（文件读取失败）';
+    } catch {
+      flipTextContent.textContent = '（文件读取失败）';
+    }
+  } else if (album.text_url) {
     try {
       const res = await fetch(album.text_url);
       flipTextContent.textContent = res.ok ? await res.text() : '（文件读取失败）';
@@ -201,6 +244,7 @@ function closeFlipCard() {
   setTimeout(() => {
     flipOverlay.classList.remove('visible');
     slides[currentSlideIndex].visible = true;
+    clearCueHighlight();
   }, 650);
 }
 

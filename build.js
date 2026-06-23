@@ -43,6 +43,7 @@ function buildCovers() {
         image_url: `/covers/${encodeURIComponent(f)}`,
         audio_url: findSidecar(AUDIO_DIR, name, AUDIO_EXTS),
         text_url:  findSidecar(TEXTS_DIR, name, ['.txt']),
+        cues_url:  findSidecar(TEXTS_DIR, name, ['.json']),
       };
     });
 }
