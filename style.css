@@ -201,7 +201,10 @@ canvas { background: #000; }
 #flip-close {
   position: absolute;
   top: 12px;
-  right: 12px;
+  /* flip-card-inner rotates 180° around its own center when showing the back
+     face, which mirrors left/right — anchor with `left` so it lands on the
+     visual right after that mirror. */
+  left: 12px;
   z-index: 1;
   width: 30px;
   height: 30px;
