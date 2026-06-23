@@ -194,7 +194,9 @@ canvas { background: #000; }
   padding: 40px 32px 32px;
   overflow-y: auto;
   box-sizing: border-box;
+  scrollbar-width: none; /* Firefox */
 }
+#flip-back::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
 #flip-close {
   position: absolute;
