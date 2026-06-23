@@ -1,6 +1,6 @@
 # texts/
 
-和 `covers/` 同名的文本文件，点击封面翻转后显示。支持两种格式：
+和 `covers/` 同名的文本文件，点击封面翻转后显示。支持三种格式：
 
 ## 1. 纯文本（`.txt`）
 
@@ -9,15 +9,31 @@ covers/A Beautiful Day.jpg
 texts/A Beautiful Day.txt   ← 直接显示全文，无高亮
 ```
 
-## 2. 带时间戳的分段文本（`.json`），随音频高亮
+## 2. SRT 字幕（`.srt`），随音频高亮 —— 推荐
+
+标准字幕格式，可以用任何字幕编辑工具（Aegisub、剪映、Whisper 自动生成等）制作。
 
 ```
 covers/A Beautiful Day.jpg
 audio/A Beautiful Day.mp3
-texts/A Beautiful Day.json  ← 按 audio 播放进度逐段高亮
+texts/A Beautiful Day.srt   ← 按 audio 播放进度逐段高亮
 ```
 
-格式：每段一个对象，`start` / `end` 为相对音频开头的秒数。
+```srt
+1
+00:00:00,000 --> 00:00:04,200
+第一段文字……
+
+2
+00:00:04,200 --> 00:00:09,500
+第二段文字……
+```
+
+## 3. 带时间戳的 JSON（`.json`），随音频高亮
+
+```
+texts/A Beautiful Day.json
+```
 
 ```json
 [
@@ -26,4 +42,6 @@ texts/A Beautiful Day.json  ← 按 audio 播放进度逐段高亮
 ]
 ```
 
-若同时存在 `.txt` 和 `.json`，优先使用 `.json`（高亮模式）。
+## 优先级
+
+若同名文件中存在多种格式，优先使用 `.srt`，其次 `.json`，最后 `.txt`。

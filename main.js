@@ -174,6 +174,33 @@ function clearCueHighlight() {
   }
 }
 
+/** Parse an SRT subtitle file into [{ start, end, text }, ...] (seconds). */
+function parseSRT(srtText) {
+  const toSeconds = (t) => {
+    const [, h, m, s, ms] = /(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/.exec(t);
+    return (+h) * 3600 + (+m) * 60 + (+s) + (+ms) / 1000;
+  };
+
+  return srtText
+    .replace(/\r/g, '')
+    .split(/\n\n+/)
+    .map(block => block.trim())
+    .filter(Boolean)
+    .map(block => {
+      const lines = block.split('\n');
+      let i = 0;
+      if (/^\d+$/.test(lines[i])) i++; // skip numeric subtitle index
+      const timing = /(\d{2}:\d{2}:\d{2}[,.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,.]\d{3})/.exec(lines[i]);
+      if (!timing) return null;
+      return {
+        start: toSeconds(timing[1]),
+        end: toSeconds(timing[2]),
+        text: lines.slice(i + 1).join(' ').trim(),
+      };
+    })
+    .filter(Boolean);
+}
+
 /** Render timed cues as paragraphs and highlight the one matching audio playback time. */
 function renderCues(cues) {
   flipTextContent.innerHTML = '';
@@ -218,12 +245,17 @@ async function showFlipCard() {
   await new Promise(r => setTimeout(r, 40));
   flipCardInner.classList.add('flipped');
 
-  // Prefer timed cues (synced highlighting); fall back to plain text, then a placeholder.
+  // Prefer timed cues (synced highlighting): .srt or .json. Fall back to plain text, then a placeholder.
   if (album.cues_url) {
     try {
       const res = await fetch(album.cues_url);
-      if (res.ok) renderCues(await res.json());
-      else flipTextContent.textContent = '（文件读取失败）';
+      if (res.ok) {
+        const isSRT = album.cues_url.toLowerCase().endsWith('.srt');
+        const cues = isSRT ? parseSRT(await res.text()) : await res.json();
+        renderCues(cues);
+      } else {
+        flipTextContent.textContent = '（文件读取失败）';
+      }
     } catch {
       flipTextContent.textContent = '（文件读取失败）';
     }
