@@ -2,6 +2,12 @@
 
 一个用 Three.js 实现的 3D coverflow 音频书架。浏览封面、播放对应音频、翻转封面阅读同步字幕，还可以选择用摄像头手势来操作整个界面。
 
+## 截图
+
+| 主界面 + 播放器 | 翻转前 | 切换内容 |
+|---|---|---|
+| ![](screenshots/coverflow-player.jpg) | ![](screenshots/coverflow-flip-front.jpg) | ![](screenshots/coverflow-flashcard.jpg) |
+
 ## 功能
 
 - 3D coverflow 导航（Three.js + GSAP），支持拖拽 / 滚轮 / 滑块切换
@@ -39,9 +45,12 @@ texts/    文本/字幕   Artist - Title.txt / .srt / .json
 
 ## 本地运行
 
-**方式一：双击运行（macOS）**
+**方式一：双击运行**
 
-直接双击 `Start.command`，会自动生成 `covers.json`、启动本地服务器，并打开 `http://localhost:3000`。
+- macOS：双击 `Start-Mac.command`
+- Windows：双击 `Start-Windows.bat`
+
+两者效果一样：自动生成 `covers.json`、启动本地服务器，并打开 `http://localhost:3000`。
 
 **方式二：命令行**
 
@@ -83,3 +92,7 @@ npm start   # 等价于 node build.js && node server.js
 - [GSAP](https://greensock.com/gsap/) — 动画
 - [MediaPipe Tasks Vision](https://ai.google.dev/edge/mediapipe/solutions/vision/gesture_recognizer/web_js) — 手势识别
 - Node.js 内置 `http` 模块写的本地服务器，无第三方依赖
+
+## 致谢
+
+本项目基于 [addyosmani/threejs-coverflow](https://github.com/addyosmani/threejs-coverflow)（[在线演示](https://threejs-coverflow.addy.ie/)）二次开发——原项目用 Three.js + GSAP 实现了苹果 Cover Flow 风格的 3D 封面流效果，本仓库在此基础上扩展了本地封面/音频/字幕管理、播放器、翻转卡片、手势控制等功能。
