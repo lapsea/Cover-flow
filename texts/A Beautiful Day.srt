@@ -1,340 +1,92 @@
 1
-00:00:00,000 --> 00:00:02,160
-This question comes from me.
+00:00:00,000 --> 00:00:04,269
+Today is the last day of school.
 
 2
-00:00:02,160 --> 00:00:04,480
-It's a new chapter from the 10th anniversary edition of What If,
+00:00:05,679 --> 00:00:07,080
+It is summer vacation.
 
 3
-00:00:04,480 --> 00:00:06,000
-which is now available online and in print.
+00:00:07,639 --> 00:00:09,359
+Grace is very excited.
 
 4
-00:00:06,000 --> 00:00:07,990
-At the end of the laser pointer video,
+00:00:10,519 --> 00:00:12,230
+This summer will be fun.
 
 5
-00:00:07,990 --> 00:00:11,000
-we constructed an array of lasers with a total power of 2x10^24 watts,
+00:00:13,080 --> 00:00:14,689
+Grace is going to visit her grandparents.
 
 6
-00:00:11,000 --> 00:00:12,369
-which not only lit up the moon,
+00:00:16,219 --> 00:00:17,489
+They have a cottage.
 
 7
-00:00:12,369 --> 00:00:15,000
-but violently ejected it from orbit around the Earth.
+00:00:18,079 --> 00:00:20,449
+The cottage is on Lake Erie.
 
 8
-00:00:15,000 --> 00:00:17,000
-We decided that was enough power.
+00:00:21,140 --> 00:00:22,600
+It is a lot of fun.
 
 9
-00:00:17,000 --> 00:00:18,000
-But why?
+00:00:23,359 --> 00:00:25,179
+Grace is going to swim.
 
 10
-00:00:18,000 --> 00:00:19,000
-You can always make a number bigger.
+00:00:25,879 --> 00:00:27,929
+She is going to play board games.
 
 11
-00:00:19,000 --> 00:00:20,000
-No one can stop you.
+00:00:29,460 --> 00:00:30,800
+She is going to talk with her grandparents.
 
 12
-00:00:20,000 --> 00:00:22,000
-There are infinitely many numbers.
+00:00:31,480 --> 00:00:33,670
+Grace is going to have fun.
 
 13
-00:00:22,000 --> 00:00:26,000
-And I want to know, what if we tried even more power?
+00:00:34,420 --> 00:00:36,530
+Grace is going to a summer camp.
 
 14
-00:00:28,000 --> 00:00:30,000
-A 2x10^24 watt laser is powerful.
+00:00:37,380 --> 00:00:38,969
+She will sleep in a cabin.
 
 15
-00:00:30,000 --> 00:00:31,030
-When we turned ours on,
+00:00:39,679 --> 00:00:41,409
+She will make lots of new friends.
 
 16
-00:00:31,030 --> 00:00:35,000
-it made the moon-facing surface of the Earth significantly more luminous than the sun.
+00:00:42,659 --> 00:00:44,799
+Grace will learn campfire songs.
 
 17
-00:00:35,000 --> 00:00:37,000
-That's impressive, but we can do better.
+00:00:45,799 --> 00:00:47,270
+Camp will be fun.
 
 18
-00:00:37,000 --> 00:00:41,000
-The universe contains death rays that make our moon-obliterating beam look like a handheld laser pointer.
+00:00:47,840 --> 00:00:50,109
+Grace is going to Cape Cod with her parents.
 
 19
-00:00:41,000 --> 00:00:47,000
-A gamma ray is just what we call a very high-energy photon of electromagnetic radiation.
+00:00:51,579 --> 00:00:53,390
+We are going for two weeks.
 
 20
-00:00:47,000 --> 00:00:49,000
-When you see a chart of the electromagnetic spectrum,
+00:00:54,259 --> 00:00:55,560
+We are going to drive.
 
 21
-00:00:49,000 --> 00:00:52,000
-gamma rays are basically anything more energetic than X-rays.
+00:00:56,219 --> 00:00:57,969
+Grace will see the ocean.
 
 22
-00:00:52,000 --> 00:00:54,000
-At the high end, they're literally off the chart.
+00:00:58,920 --> 00:01:00,530
+Cape Cod will be beautiful.
 
 23
-00:00:54,000 --> 00:00:57,000
-They come from high-energy events like nuclear explosions.
-
-24
-00:00:57,000 --> 00:01:00,000
-Gamma-ray bursts are made when something very bad happens to a star.
-
-25
-00:01:00,000 --> 00:01:01,079
-When massive stars collapse,
-
-26
-00:01:01,079 --> 00:01:04,000
-their cores give in to the crushing pull of their own gravity,
-
-27
-00:01:04,000 --> 00:01:05,379
-release an enormous burst of energy,
-
-28
-00:01:05,379 --> 00:01:07,000
-and tear the star apart from the inside.
-
-29
-00:01:07,000 --> 00:01:09,000
-For reasons that we don't fully understand,
-
-30
-00:01:09,000 --> 00:01:13,000
-these explosions often produce jets shooting away along the poles of the collapsing star.
-
-31
-00:01:13,000 --> 00:01:15,099
-These jets can travel across much of the universe,
-
-32
-00:01:15,099 --> 00:01:17,000
-and when Earth is in line with one of them,
-
-33
-00:01:17,000 --> 00:01:19,000
-we see it as a flash of gamma rays from deep space.
-
-34
-00:01:19,000 --> 00:01:24,000
-We didn't know about gamma-ray bursts until we launched a satellite to watch for gamma-ray flashes from nuclear explosions on Earth,
-
-35
-00:01:24,000 --> 00:01:28,000
-and we were surprised to see flashes coming from everywhere else in the universe instead.
-
-36
-00:01:28,000 --> 00:01:32,000
-The peak power of beams from gamma-ray bursts can be on the order of 10 to the 44 watts,
-
-37
-00:01:32,000 --> 00:01:35,000
-which is much, much more powerful than our laser array.
-
-38
-00:01:35,000 --> 00:01:37,000
-To get a 10 to the 44 watt death ray of our own,
-
-39
-00:01:37,000 --> 00:01:42,000
-we'd need to give each person on the moon-facing side of the planet a 2 times 10 to the 34 watt laser.
-
-40
-00:01:42,000 --> 00:01:42,439
-That is,
-
-41
-00:01:42,439 --> 00:01:48,000
-each person would need a laser 10 billion times more powerful than the final combined laser that violently ejected the moon.
-
-42
-00:01:48,000 --> 00:01:50,120
-This is an implausible scenario,
-
-43
-00:01:50,120 --> 00:01:52,000
-and it wouldn't work for reasons we'll get to in a minute.
-
-44
-00:01:52,000 --> 00:01:55,000
-But first, let's think about what we could do with a beam like that.
-
-45
-00:01:55,000 --> 00:01:56,200
-We'd have to focus it carefully,
-
-46
-00:01:56,200 --> 00:01:58,000
-since laser beams spread out as they travel.
-
-47
-00:01:58,000 --> 00:02:01,000
-The minimum angle of spread depends on the size of the source of the beam.
-
-48
-00:02:01,000 --> 00:02:04,439
-For laser beams emitted by lenses 2 meters wide, the limit is about 0.1
-
-49
-00:02:04,439 --> 00:02:07,000
-arcseconds, or 3/100,000th of a degree.
-
-50
-00:02:07,000 --> 00:02:13,000
-The laser beam limit formula is weirdly similar to the formula used to determine the maximum resolution of telescopes like Hubble,
-
-51
-00:02:13,000 --> 00:02:16,000
-because, in a sense, a telescope is just a death ray running in reverse.
-
-52
-00:02:16,000 --> 00:02:17,150
-Hubble has a 2.4
-
-53
-00:02:17,150 --> 00:02:20,449
-meter mirror, and its angular resolution is a little less than 0.1
-
-54
-00:02:20,449 --> 00:02:24,000
-arcseconds, similar to the angular limit of our 2 meter laser.
-
-55
-00:02:24,000 --> 00:02:26,590
-The laser array from the original chapter was pretty powerful,
-
-56
-00:02:26,590 --> 00:02:28,000
-but not particularly narrow.
-
-57
-00:02:28,000 --> 00:02:30,050
-If it had been focused into a Hubble-style beam,
-
-58
-00:02:30,050 --> 00:02:34,000
-it could conceivably have fried the surfaces of planets anywhere in our galaxy.
-
-59
-00:02:34,000 --> 00:02:37,000
-A 10 to the 44 watt death ray would be much worse.
-
-60
-00:02:37,000 --> 00:02:39,030
-If we tightly focused it down to the diffraction limit,
-
-61
-00:02:39,030 --> 00:02:41,000
-it could reach targets far outside our galaxy,
-
-62
-00:02:41,000 --> 00:02:45,000
-frying the surfaces of planets up to 5 or 10 billion light years away.
-
-63
-00:02:45,000 --> 00:02:48,000
-But don't rush out to buy a 10 to the 44 watt laser just yet.
-
-64
-00:02:48,000 --> 00:02:51,000
-At cosmic energy scales, normal optics breaks down.
-
-65
-00:02:51,000 --> 00:02:53,310
-For example, if a beam is powerful enough,
-
-66
-00:02:53,310 --> 00:02:56,000
-it could exert a gravitational pull on itself.
-
-67
-00:02:56,000 --> 00:02:59,000
-Photons carry energy, and energy creates gravitational fields.
-
-68
-00:02:59,000 --> 00:03:01,000
-For normal light beams, this is negligible.
-
-69
-00:03:01,000 --> 00:03:04,000
-But for a 10 to the 44 watt laser the size of the Earth,
-
-70
-00:03:04,000 --> 00:03:08,000
-photons on the outer edge would experience an acceleration of over 10 G's toward the beam's center line.
-
-71
-00:03:08,000 --> 00:03:10,000
-But physics has another surprise,
-
-72
-00:03:10,000 --> 00:03:14,000
-one that finally puts an upper limit on how powerful lasers can get.
-
-73
-00:03:14,000 --> 00:03:16,069
-Namely, if a beam of light gets too bright,
-
-74
-00:03:16,069 --> 00:03:18,000
-space itself stops being transparent.
-
-75
-00:03:18,000 --> 00:03:21,000
-If you pack enough laser energy into a small enough space,
-
-76
-00:03:21,000 --> 00:03:26,000
-quantum mechanics predicts that the strong electromagnetic fields will result in spontaneous creation of particles and antiparticles.
-
-77
-00:03:26,000 --> 00:03:29,000
-These particles, mostly electrons and positrons,
-
-78
-00:03:29,000 --> 00:03:30,000
-would intercept some of the laser energy,
-
-79
-00:03:30,000 --> 00:03:33,000
-which would result in more particles being created.
-
-80
-00:03:33,000 --> 00:03:36,000
-For laser power densities above about 10 to the 26 watts per square centimeter,
-
-81
-00:03:36,000 --> 00:03:38,000
-this process is expected to cascade,
-
-82
-00:03:38,000 --> 00:03:43,000
-fully halting the laser's progress and providing an upper limit on how much power our beam can have.
-
-83
-00:03:43,000 --> 00:03:46,000
-In the end, it turns out, physics is not math.
-
-84
-00:03:46,000 --> 00:03:48,099
-You can always find a bigger number,
-
-85
-00:03:48,099 --> 00:03:50,000
-but you can't always make a bigger laser.
+00:01:01,500 --> 00:01:03,710
+Summer vacation is fun.
 

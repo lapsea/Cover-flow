@@ -280,6 +280,267 @@ function closeFlipCard() {
   }, 650);
 }
 
+// ── Gesture control ──────────────────────────────────────────────────────────
+// Optional camera-based control, toggled on demand. Uses MediaPipe Tasks Vision's
+// GestureRecognizer (7 built-in static poses) for flip/close/play/pause, plus a
+// hand-rolled palm-centroid tracker for swipe-left/right (not a static pose).
+
+const GESTURE_WASM_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm';
+const GESTURE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task';
+
+/** Maps MediaPipe's built-in gesture categories to the labels shown in the preview panel. */
+const GESTURE_ACTION_LABELS = {
+  Victory: '翻转',
+  Closed_Fist: '关闭',
+  Thumb_Up: '播放',
+  Thumb_Down: '暂停',
+};
+
+const GESTURE_SCORE_THRESHOLD = 0.65;
+const GESTURE_CONFIRM_FRAMES = 3;   // consecutive frames required before firing (debounce)
+const GESTURE_INFERENCE_INTERVAL_MS = 80; // throttle inference to ~12fps
+
+const SWIPE_SMOOTHING_SAMPLES = 5;  // moving-average window, filters single-frame jitter
+const SWIPE_MIN_DISPLACEMENT = 0.15; // normalized x distance (vs. reference) to trigger
+const SWIPE_SETTLE_THRESHOLD = 0.025; // frame-to-frame movement below this counts as "calm"
+const SWIPE_SETTLE_FRAMES = 4;      // consecutive calm frames required to re-arm after a trigger
+
+const gestureToggleBtn = document.getElementById('gesture-toggle-btn');
+const gesturePanel     = document.getElementById('gesture-panel');
+const gestureVideo     = document.getElementById('gesture-video');
+const gestureCanvas    = document.getElementById('gesture-canvas');
+const gestureLabel     = document.getElementById('gesture-label');
+const gestureCtx       = gestureCanvas.getContext('2d');
+
+let gestureRecognizer = null;
+let gestureStream = null;
+let gestureLoopId = null;
+let gestureActive = false;
+let lastGestureInferenceTime = 0;
+let lastGestureVideoTime = -1;
+
+let pendingGesture = null;
+let pendingGestureCount = 0;
+let lastFiredGesture = null;
+
+let swipeXHistory = [];     // recent raw x samples, smoothed via moving average
+let swipeReferenceX = null; // smoothed x position the next swipe is measured from
+let swipeArmed = true;      // false right after a trigger, until the hand settles
+let swipeSettleCount = 0;
+let prevSmoothedX = null;
+
+gestureToggleBtn.addEventListener('click', () => {
+  gestureActive ? stopGestureMode() : startGestureMode();
+});
+
+async function loadGestureRecognizer() {
+  if (gestureRecognizer) return gestureRecognizer;
+  const { GestureRecognizer, FilesetResolver } = await import(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3'
+  );
+  const vision = await FilesetResolver.forVisionTasks(GESTURE_WASM_URL);
+  gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
+    baseOptions: { modelAssetPath: GESTURE_MODEL_URL, delegate: 'GPU' },
+    runningMode: 'VIDEO',
+    numHands: 1,
+  });
+  return gestureRecognizer;
+}
+
+async function startGestureMode() {
+  gestureToggleBtn.disabled = true;
+  const originalLabel = gestureToggleBtn.textContent;
+  gestureToggleBtn.textContent = '⏳';
+
+  try {
+    await loadGestureRecognizer();
+    gestureStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 320, height: 240 },
+      audio: false,
+    });
+    gestureVideo.srcObject = gestureStream;
+    await gestureVideo.play();
+
+    gestureActive = true;
+    gestureToggleBtn.classList.add('active');
+    gesturePanel.classList.add('visible');
+    resetSwipeState();
+    lastFiredGesture = null;
+    pendingGesture = null;
+    pendingGestureCount = 0;
+    gestureLoop();
+  } catch (err) {
+    console.error('Failed to start gesture mode:', err);
+    alert('无法开启摄像头，请检查权限设置。');
+    stopGestureMode();
+  } finally {
+    gestureToggleBtn.disabled = false;
+    gestureToggleBtn.textContent = originalLabel;
+  }
+}
+
+function stopGestureMode() {
+  gestureActive = false;
+  gestureToggleBtn.classList.remove('active');
+  gesturePanel.classList.remove('visible');
+  gestureLabel.textContent = '';
+  if (gestureLoopId) { cancelAnimationFrame(gestureLoopId); gestureLoopId = null; }
+  if (gestureStream) { gestureStream.getTracks().forEach(t => t.stop()); gestureStream = null; }
+  gestureVideo.srcObject = null;
+  gestureCtx.clearRect(0, 0, gestureCanvas.width, gestureCanvas.height);
+}
+
+function gestureLoop() {
+  if (!gestureActive) return;
+  gestureLoopId = requestAnimationFrame(gestureLoop);
+
+  const now = performance.now();
+  if (now - lastGestureInferenceTime < GESTURE_INFERENCE_INTERVAL_MS) return;
+  lastGestureInferenceTime = now;
+
+  if (gestureVideo.readyState < 2 || gestureVideo.currentTime === lastGestureVideoTime) return;
+  lastGestureVideoTime = gestureVideo.currentTime;
+
+  if (gestureCanvas.width !== gestureVideo.videoWidth) {
+    gestureCanvas.width = gestureVideo.videoWidth;
+    gestureCanvas.height = gestureVideo.videoHeight;
+  }
+
+  const result = gestureRecognizer.recognizeForVideo(gestureVideo, now);
+  gestureCtx.clearRect(0, 0, gestureCanvas.width, gestureCanvas.height);
+
+  if (!result.landmarks.length) {
+    gestureLabel.textContent = '未检测到手';
+    resetSwipeState();
+    pendingGesture = null;
+    pendingGestureCount = 0;
+    return;
+  }
+
+  drawHandLandmarks(result.landmarks[0]);
+  const swipeDebug = handleSwipeTracking(result.landmarks[0]);
+
+  const top = result.gestures[0]?.[0];
+  let gestureText;
+  if (top && GESTURE_ACTION_LABELS[top.categoryName] && top.score >= GESTURE_SCORE_THRESHOLD) {
+    gestureText = `${GESTURE_ACTION_LABELS[top.categoryName]} ${Math.round(top.score * 100)}%`;
+    handleStaticGesture(top.categoryName);
+  } else {
+    gestureText = top ? top.categoryName : '未识别';
+    pendingGesture = null;
+    pendingGestureCount = 0;
+  }
+
+  // Debug readout: Δ is the signed displacement from the swipe reference point
+  // (normalized [0,1]; triggers at ±0.15) — R = armed/ready, ⏸ = settling after a trigger.
+  gestureLabel.textContent = `${gestureText} | Δ${swipeDebug.delta.toFixed(2)} ${swipeDebug.armed ? 'R' : '⏸'}`;
+}
+
+function drawHandLandmarks(landmarks) {
+  gestureCtx.fillStyle = '#4ade80';
+  for (const lm of landmarks) {
+    gestureCtx.beginPath();
+    gestureCtx.arc(lm.x * gestureCanvas.width, lm.y * gestureCanvas.height, 3, 0, Math.PI * 2);
+    gestureCtx.fill();
+  }
+}
+
+/** Debounced static-pose dispatch: fires once per "hold", not every frame. */
+function handleStaticGesture(categoryName) {
+  if (categoryName === pendingGesture) {
+    pendingGestureCount++;
+  } else {
+    pendingGesture = categoryName;
+    pendingGestureCount = 1;
+  }
+
+  if (pendingGestureCount < GESTURE_CONFIRM_FRAMES) return;
+  if (categoryName === lastFiredGesture) return; // already fired for this hold
+  lastFiredGesture = categoryName;
+
+  switch (categoryName) {
+    case 'Victory':
+      if (!isFlipOpen()) showFlipCard();
+      break;
+    case 'Closed_Fist':
+      if (isFlipOpen()) closeFlipCard();
+      break;
+    case 'Thumb_Up':
+      if (!playPauseBtn.disabled && audioEl.paused) audioEl.play();
+      break;
+    case 'Thumb_Down':
+      if (!playPauseBtn.disabled && !audioEl.paused) audioEl.pause();
+      break;
+  }
+}
+
+function resetSwipeState() {
+  swipeXHistory = [];
+  swipeReferenceX = null;
+  swipeArmed = true;
+  swipeSettleCount = 0;
+  prevSmoothedX = null;
+}
+
+/**
+ * Tracks palm centroid x-position to detect a left/right swipe motion.
+ * Uses a moving average to filter single-frame jitter, and a settle-based
+ * re-arm (instead of a fixed cooldown) so one swipe — fast or slow — only
+ * ever fires once: after triggering, no new swipe can fire until the hand's
+ * frame-to-frame movement drops below SWIPE_SETTLE_THRESHOLD for
+ * SWIPE_SETTLE_FRAMES in a row.
+ */
+function handleSwipeTracking(landmarks) {
+  if (isFlipOpen()) { resetSwipeState(); return { delta: 0, armed: true }; } // don't navigate while the card is open
+
+  // Palm centroid: average of wrist + each finger's base knuckle.
+  const idx = [0, 5, 9, 13, 17];
+  const rawX = idx.reduce((sum, i) => sum + landmarks[i].x, 0) / idx.length;
+
+  swipeXHistory.push(rawX);
+  if (swipeXHistory.length > SWIPE_SMOOTHING_SAMPLES) swipeXHistory.shift();
+  const smoothedX = swipeXHistory.reduce((a, b) => a + b, 0) / swipeXHistory.length;
+
+  if (swipeReferenceX === null) swipeReferenceX = smoothedX;
+
+  const frameMovement = prevSmoothedX === null ? 0 : Math.abs(smoothedX - prevSmoothedX);
+  prevSmoothedX = smoothedX;
+
+  // Raw video coordinates are unmirrored, but the preview is shown mirrored (CSS)
+  // for a natural selfie view — invert the delta to match what the user perceives.
+  const perceivedDelta = -(smoothedX - swipeReferenceX);
+
+  if (!swipeArmed) {
+    // Waiting for the hand to calm down before allowing another trigger.
+    if (frameMovement < SWIPE_SETTLE_THRESHOLD) {
+      swipeSettleCount++;
+      if (swipeSettleCount >= SWIPE_SETTLE_FRAMES) {
+        swipeArmed = true;
+        swipeReferenceX = smoothedX; // re-baseline once settled
+      }
+    } else {
+      swipeSettleCount = 0;
+    }
+    return { delta: perceivedDelta, armed: false };
+  }
+
+  if (Math.abs(perceivedDelta) >= SWIPE_MIN_DISPLACEMENT) {
+    stepSlide(perceivedDelta > 0 ? 1 : -1);
+    swipeArmed = false;
+    swipeSettleCount = 0;
+    return { delta: perceivedDelta, armed: false };
+  }
+
+  return { delta: perceivedDelta, armed: true };
+}
+
+function stepSlide(delta) {
+  const target = Math.max(0, Math.min(numSlides - 1, currentSlideIndex + delta));
+  if (target === currentSlideIndex) return;
+  elementInput.valueAsNumber = target / (numSlides - 1);
+  moveSlide(target);
+}
+
 // ── Scene initialization ─────────────────────────────────────────────────────
 
 async function init() {

@@ -1,0 +1,196 @@
+1
+00:00:00,000 --> 00:00:06,599
+Charles Darwin made what might be the most important scientific discovery of all time,
+
+2
+00:00:09,199 --> 00:00:11,500
+the theory of evolution by natural selection.
+
+3
+00:00:12,480 --> 00:00:20,390
+It was Darwin who first understood how it was that plants and animals evolved over time to produce new and different species.
+
+4
+00:00:21,440 --> 00:00:26,350
+At first, this theory faced much opposition, but since that time,
+
+5
+00:00:26,350 --> 00:00:29,149
+it has been supported by evidence from many areas of science.
+
+6
+00:00:31,079 --> 00:00:34,539
+Darwin was born in a small town in England in 1809.
+
+7
+00:00:35,840 --> 00:00:37,729
+When he was a young man, he went to university,
+
+8
+00:00:38,899 --> 00:00:42,149
+first to study medicine and later to study religion.
+
+9
+00:00:42,700 --> 00:00:45,969
+However, Darwin found his schoolwork to be very boring.
+
+10
+00:00:46,880 --> 00:00:47,439
+Instead,
+
+11
+00:00:47,439 --> 00:00:51,439
+he preferred outdoor activities and was very interested in nature.
+
+12
+00:00:52,399 --> 00:00:54,259
+While Darwin was at university,
+
+13
+00:00:56,079 --> 00:01:01,600
+the British Navy was planning to send one of its ships called the Beagle on a voyage of exploration.
+
+14
+00:01:02,280 --> 00:01:03,619
+As part of this voyage,
+
+15
+00:01:03,619 --> 00:01:08,969
+the ship would need a naturalist who could study the various plants and animals that might be found.
+
+16
+00:01:09,879 --> 00:01:13,049
+Darwin was recommended for this job by one of his professors,
+
+17
+00:01:13,049 --> 00:01:15,150
+who had been impressed by Darwin.
+
+18
+00:01:16,099 --> 00:01:18,939
+Darwin was chosen as the naturalist of the Beagle,
+
+19
+00:01:18,939 --> 00:01:21,939
+and the ship left England in 1831.
+
+20
+00:01:22,840 --> 00:01:24,609
+The ship's voyage took Darwin around the world,
+
+21
+00:01:25,319 --> 00:01:28,939
+and he observed many species of plants and animals on his trip.
+
+22
+00:01:29,939 --> 00:01:33,500
+In one place near South America, known as the Galapagos Islands,
+
+23
+00:01:34,700 --> 00:01:36,989
+Darwin observed many unusual species of birds.
+
+24
+00:01:38,200 --> 00:01:41,030
+Several of these birds seemed closely related to each other,
+
+25
+00:01:41,799 --> 00:01:43,469
+but they differed in interesting ways.
+
+26
+00:01:44,319 --> 00:01:44,950
+For example,
+
+27
+00:01:44,950 --> 00:01:49,250
+some birds had long beaks that could reach insects hidden in the bark of trees,
+
+28
+00:01:50,379 --> 00:01:53,670
+but other birds had thick beaks that could break open the shells of nuts.
+
+29
+00:01:55,099 --> 00:02:00,140
+What Darwin realized was that certain characteristics could help an animal or a plant to survive and reproduce.
+
+30
+00:02:03,099 --> 00:02:07,209
+Individuals that lacked those characteristics would become more likely to die without reproducing.
+
+31
+00:02:09,439 --> 00:02:10,639
+Over many generations,
+
+32
+00:02:10,639 --> 00:02:17,810
+the useful characteristics would then become more and more common as the surviving individuals passed the characteristics on to their offspring.
+
+33
+00:02:19,840 --> 00:02:21,210
+Eventually, after many generations,
+
+34
+00:02:21,210 --> 00:02:26,280
+the changes would be so great that a new species would exist.
+
+35
+00:02:26,620 --> 00:02:30,669
+In this way, a single species could divide into two or more new ones.
+
+36
+00:02:32,020 --> 00:02:34,659
+This was called the process of evolution by natural selection.
+
+37
+00:02:36,460 --> 00:02:38,150
+When Darwin returned to England,
+
+38
+00:02:38,150 --> 00:02:40,280
+he studied plants and animals in more detail.
+
+39
+00:02:42,240 --> 00:02:43,580
+After much research,
+
+40
+00:02:43,580 --> 00:02:47,219
+he began writing a book about his theory of evolution by natural selection.
+
+41
+00:02:48,319 --> 00:02:52,180
+When the book The Origin of Species was published in 1859,
+
+42
+00:02:53,280 --> 00:02:54,280
+it was very popular.
+
+43
+00:02:54,659 --> 00:02:56,069
+It was very popular and very controversial.
+
+44
+00:02:56,680 --> 00:03:00,050
+During the next 20 years, Darwin continued his scientific research,
+
+45
+00:03:02,000 --> 00:03:03,330
+and he wrote several more books.
+
+46
+00:03:03,919 --> 00:03:06,110
+By the time of his death in 1882,
+
+47
+00:03:06,900 --> 00:03:12,860
+many biologists had realized that Darwin had made one of the most important scientific discoveries of all time.
+
+48
+00:03:13,780 --> 00:03:14,969
+For the first time,
+
+49
+00:03:14,969 --> 00:03:18,949
+scientists could understand the origin of the many different species of plants and animals.
+
